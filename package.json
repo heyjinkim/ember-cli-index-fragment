@@ -1,6 +1,6 @@
 {
-  "name": "lc-addon",
-  "version": "0.0.0",
+  "name": "ember-cli-index-fragment",
+  "version": "0.1.0",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -10,7 +10,7 @@
     "build": "ember build",
     "test": "ember test"
   },
-  "repository": "https://github.com/stefanpenner/ember-cli",
+  "repository": "https://github.com/heyjinkim/ember-cli-index-fragment",
   "engines": {
     "node": ">= 0.10.0"
   },
