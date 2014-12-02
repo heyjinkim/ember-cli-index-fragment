@@ -35,5 +35,8 @@
   ],
   "ember-addon": {
     "configPath": "tests/dummy/config"
+  },
+  "dependencies": {
+    "chalk": "^0.5.1"
   }
 }
