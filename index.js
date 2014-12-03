@@ -3,32 +3,65 @@ var path = require('path');
 var fs = require('fs');
 var chalk = require('chalk');
 
+var fragments = [
+  {name: 'head', start: '<!-- fragment:head -->', end: '<!-- /fragment:head -->'},
+  {name: 'body', start: '<!-- fragment:body -->', end: '<!-- /fragment:body -->'}
+];
+
+function warn(msg){
+  console.log(chalk.yellow(msg));
+}
+
+function error(msg){
+  console.log(chalk.red(msg));
+}
+
+function success(msg){
+  console.log(chalk.green(msg));
+}
+
+function hasFragment(content, fragment){
+  var start = content.indexOf(fragment.start),
+      end   = content.indexOf(fragment.end);
+
+  if (start === -1) {
+    warn('Missing fragment start for ' + fragment.name + '. Looked for: ' + fragment.start);
+  }
+
+  if (end === -1) {
+    warn('Missing fragment end for ' + fragment.name + '. Looked for: ' + fragment.end);
+  }
+
+  return start > -1 && end > -1;
+}
+
+function readFragment(content, fragment){
+  return content.slice(
+    content.indexOf(fragment.start) + fragment.start.length,
+    content.indexOf(fragment.end) );
+}
+
+function writeFragment(html, fragment, root){
+  var filePath = path.join(root, 'dist', 'ember-fragment-' + fragment.name + '.html');
+  fs.writeFileSync(filePath, html);
+  success('Generated ' + filePath + ' successfully.');
+}
+
 module.exports = {
-  name: 'lc-addon',
+  name: 'ember-cli-index-fragment',
+
   postBuild: function(result){
+    var root = this.project.root;
     var index = path.join(result.directory, 'index.html');
     var content = fs.readFileSync(index, {encoding: 'utf8'});
 
-    var startHeader = content.indexOf('<!-- fragment:head -->');
-    var endHeader = content.indexOf('<!-- /fragment:head -->');
-    var pathHeader = path.join(this.project.root, 'dist', 'ember-fragment-head.html');
-    if (startHeader >= 0 && endHeader >= 0){
-      var contentHeader = content.slice(startHeader, endHeader);
-      fs.writeFileSync(pathHeader, contentHeader);
-      console.log(chalk.green('\nGenerated ' + pathHeader  + ' successfully.'));
-    }else{
-      console.log(chalk.red('\nCouldn\'t find ' + pathHeader  + '.'));
-    }
-
-    var startBody = content.indexOf('<!-- fragment:body -->');
-    var endBody = content.indexOf('<!-- /fragment:body -->');
-    var pathBody = path.join(this.project.root, 'dist', 'ember-fragment-body.html');
-    if (startBody >= 0 && endBody >= 0){
-      var contentBody = content.slice(startBody, endBody);
-      fs.writeFileSync(pathBody, contentBody);
-      console.log(chalk.green('Generated ' + pathBody  + ' successfully.'));
-    }else{
-      console.log(chalk.red('Couldn\'t find ' + pathHeader  + '.'));
-    }
+    fragments.forEach(function(fragment){
+      if (!hasFragment(content, fragment)) {
+        error('Missing fragment ' + fragment.name);
+      } else {
+        var html = readFragment(content, fragment);
+        writeFragment(html, fragment, root);
+      }
+    });
   }
 };
