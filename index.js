@@ -42,7 +42,12 @@ function readFragment(content, fragment){
 }
 
 function writeFragment(html, fragment, root){
-  var filePath = path.join(root, 'dist', 'ember-fragment-' + fragment.name + '.html');
+  var outputPath = 'dist';
+  var indexOfOutput = process.argv.indexOf('--output-path'); 
+  if (indexOfOutput > 0){
+    outputPath = process.argv[indexOfOutput+1];
+  }
+  var filePath = path.join(root, outputPath, 'ember-fragment-' + fragment.name + '.html');
   fs.writeFileSync(filePath, html);
   success('Generated ' + filePath + ' successfully.');
 }
